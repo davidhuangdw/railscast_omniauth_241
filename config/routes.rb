@@ -1,6 +1,10 @@
 Rails.application.routes.draw do
-  resources :articles
 
+  resources :sessions, only:[:create, :destroy]
+  get '/logout' => 'sessions#destroy', as: 'logout'
+  get '/auth/:provider/callback' => 'sessions#create'
+
+  resources :articles
   resources :users
   root 'articles#index'
 

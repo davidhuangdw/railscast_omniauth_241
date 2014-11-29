@@ -33,6 +33,12 @@
               %a{:href => "#about"} About
             %li
               %a{:href => "#contact"} Contact
+          %ul.nav.navbar-nav.navbar-right
+            - if current_user
+              %li= link_to "profile #{current_user.name}", current_user
+              %li= link_to "Logout", logout_path
+            - else
+              %li= link_to 'sign in with douban', '/auth/douban'
     .container
       - flash.each do |name, msg|
         = content_tag :div, :class => "alert alert-#{%w[alert error].include?(name.to_s) ? "danger" : "success" } alert-dismissable", :role => "alert" do
