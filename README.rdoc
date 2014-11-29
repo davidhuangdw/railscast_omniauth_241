@@ -1,28 +1,42 @@
-== README
+### simple omniauth
 
-This README would normally document whatever steps are necessary to get the
-application up and running.
+        # handle auth denied:
+        # routes.rb
+        get '/auth/failure' => 'sessions#fail'   # will direct to /auth/failure in procuction env
 
-Things you may want to cover:
+          def fail
+            redirect_to root_url, alert:'Auth fails.'
+          end
 
-* Ruby version
+        # models/user.rb
+          def self.from_omniauth(auth)
+            User.find_or_create_by(provider:auth[:provider], uid:auth[:uid]) do |user|
+              user.name = auth[:info][:name]
+            end
+          end
 
-* System dependencies
+        # douban will save info into env['omniauth.auth']
+        # which will give: provider, uid, info(name, avatar, ...)
+        class SessionsController
+          def create
+            # raise env['omniauth.auth'].to_yaml
+            user = User.from_omniauth(env['omniauth.auth'])
+            session[:user_id] = user.id
+            redirect_to root_url, notice:'Log in successfully.'
+          end
+        end
 
-* Configuration
+        # routes.rb
+          resources :sessions, only:[:create, :destroy]
+          get '/logout' => 'sessions#destroy', as: 'logout'
+          get 'auth/:provider/callback' => 'sessions#create'
 
-* Database creation
+        # config/initializer/omniauth.rb
+        OmniAuth.config.logger = Rails.logger
+        Rails.application.config.middleware.use OmniAuth::Builder do            # add to rack middleware
+          provider :developer unless Rails.env.production?
+          # provider :twitter, ENV['TWITTER_KEY'], ENV['TWITTER_SECRET']
+          config.omniauth :douban, "0549c71c2e64ecd20fdd55548b2ec676", "73b0076706feef65"
+        end
 
-* Database initialization
-
-* How to run the test suite
-
-* Services (job queues, cache servers, search engines, etc.)
-
-* Deployment instructions
-
-* ...
-
-
-Please feel free to use a different markup language if you do not plan to run
-<tt>rake doc:app</tt>.
+        gem 'omniauth-douban-oauth2'
