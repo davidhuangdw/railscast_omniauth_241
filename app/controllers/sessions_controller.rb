@@ -12,4 +12,7 @@ class SessionsController < ApplicationController
     session[:user_id] = nil
     redirect_to root_url, notice:'Log out successfully.'
   end
+  def fail
+    redirect_to root_url, alert:'Auth fails.'
+  end
 end

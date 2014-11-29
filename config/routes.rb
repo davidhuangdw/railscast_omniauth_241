@@ -3,6 +3,7 @@ Rails.application.routes.draw do
   resources :sessions, only:[:create, :destroy]
   get '/logout' => 'sessions#destroy', as: 'logout'
   get '/auth/:provider/callback' => 'sessions#create'
+  get '/auth/failure' => 'sessions#fail'
 
   resources :articles
   resources :users
